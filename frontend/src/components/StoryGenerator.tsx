@@ -4,7 +4,7 @@ import axios from "axios"
 import ThemeInput from "./ThemeInput"
 import LoadingStatus from "./LoadingStatus"
 
-const API_BASE_URL = "/api"
+const API_BASE_URL = "https://myadventure-hsjf.vercel.app/api"
 
 type JobStatus = "pending" | "processing" | "completed" | "failed"
 
