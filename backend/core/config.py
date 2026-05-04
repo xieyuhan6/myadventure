@@ -1,6 +1,6 @@
 from typing import List, Optional
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
+from pydantic import field_validator, Field
 
 class Settings(BaseSettings):
     API_PREFIX:str="/api"
@@ -8,17 +8,18 @@ class Settings(BaseSettings):
 
     DATABASE_URL:str
 
-    ALLOWED_ORIGINS:str=""
+    ALLOWED_ORIGINS: List[str] = Field(default_factory=list)
 
-    OPENAI_API_KEY:str=""
 
     HF_API_TOKEN: Optional[str] = None
     HF_MODEL: str = "moonshotai/Kimi-K2-Instruct-0905"
     USE_LOCAL_HF: bool = False
 
-    @field_validator("ALLOWED_ORIGINS")
-    def parse_allowed_origins(cls,v:str)->List[str]:
-        return v.split(",") if v else[]
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    def parse_allowed_origins(cls, v):
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v
     
     class Config:
         env_file=".env"
