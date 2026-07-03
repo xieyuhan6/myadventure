@@ -1,6 +1,7 @@
-from typing import List, Optional
+import json
+from typing import Optional
 from pydantic_settings import BaseSettings
-from pydantic import field_validator, Field
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     API_PREFIX:str="/api"
@@ -8,7 +9,7 @@ class Settings(BaseSettings):
 
     DATABASE_URL:str
 
-    ALLOWED_ORIGINS: List[str] = Field(default_factory=list)
+    ALLOWED_ORIGINS: str = ""
 
 
     HF_API_TOKEN: Optional[str] = None
@@ -17,9 +18,35 @@ class Settings(BaseSettings):
 
     @field_validator("ALLOWED_ORIGINS", mode="before")
     def parse_allowed_origins(cls, v):
+        if isinstance(v, list):
+            return ",".join(str(origin) for origin in v)
         if isinstance(v, str):
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+            value = v.strip()
+            if not value:
+                return ""
+            if value.startswith("["):
+                try:
+                    parsed = json.loads(value)
+                except Exception:
+                    return value
+                if isinstance(parsed, list):
+                    return ",".join(str(origin) for origin in parsed)
+            return value
+        return ""
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        value = self.ALLOWED_ORIGINS.strip()
+        if not value:
+            return []
+        if value.startswith("["):
+            try:
+                parsed = json.loads(value)
+            except Exception:
+                parsed = []
+            if isinstance(parsed, list):
+                return [str(origin).strip() for origin in parsed if str(origin).strip()]
+        return [origin.strip() for origin in value.split(",") if origin.strip()]
     
     class Config:
         env_file=".env"
