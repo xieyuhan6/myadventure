@@ -8,7 +8,7 @@ import LoadingStatus from "./LoadingStatus"
 const API_BASE_URL = 
   typeof window !== 'undefined' && window.location.hostname === 'localhost'
     ? '/api'
-    : 'https://myadventure-hsjf.vercel.app/api'
+    : 'https://myadventure.onrender.com/api'
 
 type JobStatus = "pending" | "processing" | "completed" | "failed"
 
