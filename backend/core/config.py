@@ -39,15 +39,21 @@ class Settings(BaseSettings):
     def allowed_origins(self) -> list[str]:
         value = self.ALLOWED_ORIGINS.strip()
         if not value:
-            return []
+            return [
+                "https://myadventure.vercel.app",
+                "https://myadventure-hsjf.vercel.app",
+                "http://localhost:5173",
+            ]
         if value.startswith("["):
             try:
                 parsed = json.loads(value)
             except Exception:
                 parsed = []
             if isinstance(parsed, list):
-                return [str(origin).strip() for origin in parsed if str(origin).strip()]
-        return [origin.strip() for origin in value.split(",") if origin.strip()]
+                origins = [str(origin).strip() for origin in parsed if str(origin).strip()]
+                return [origin[:-1] if origin.endswith("/") else origin for origin in origins]
+        origins = [origin.strip() for origin in value.split(",") if origin.strip()]
+        return [origin[:-1] if origin.endswith("/") else origin for origin in origins]
     
     class Config:
         env_file = Path(__file__).resolve().parent.parent / ".env"
