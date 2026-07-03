@@ -4,7 +4,11 @@ import axios, { AxiosError } from "axios"
 import LoadingStatus from "./LoadingStatus"
 import StoryGame from "./StoryGame"
 
-const API_BASE_URL = "/api"
+// 根据环境判断：本地用 /api (Vite 代理)，生产用完整 URL
+const API_BASE_URL = 
+  typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    ? '/api'
+    : 'https://myadventure-hsjf.vercel.app/api'
 
 type Story = any 
 

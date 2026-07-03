@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# 允许跨域
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,7 +19,6 @@ async def health():
 async def root():
     return {"message": "Choose Your Own Adventure Game API"}
 
-# 导入后端的路由
 try:
     from pathlib import Path
     import sys
