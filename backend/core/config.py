@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Optional
 from pydantic_settings import BaseSettings
 from pydantic import field_validator
@@ -49,7 +50,7 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in value.split(",") if origin.strip()]
     
     class Config:
-        env_file=".env"
+        env_file = Path(__file__).resolve().parent.parent / ".env"
         env_file_encoding="utf-8"
         case_sensitive=True
 
