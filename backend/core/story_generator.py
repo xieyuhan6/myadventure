@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 from openai import OpenAI
 from typing import Optional
@@ -56,6 +57,56 @@ def _call_local_model(prompt: str, max_new_tokens: int = 512) -> str:
     generated = tokenizer.decode(out_ids[0][inputs["input_ids"].shape[-1]:], skip_special_tokens=True)
     return generated
 
+def _build_fallback_story(theme: str) -> str:
+    story = {
+        "title": f"The {theme.title()} Case",
+        "rootNode": {
+            "content": f"You arrive in a world shaped by {theme}.",
+            "isEnding": False,
+            "isWinningEnding": False,
+            "options": [
+                {
+                    "text": "Investigate the strange clue",
+                    "nextNode": {
+                        "content": "The clue leads you to a hidden chamber.",
+                        "isEnding": False,
+                        "isWinningEnding": False,
+                        "options": [
+                            {
+                                "text": "Open the glowing door",
+                                "nextNode": {
+                                    "content": "You solve the mystery and uncover the truth.",
+                                    "isEnding": True,
+                                    "isWinningEnding": True,
+                                    "options": []
+                                }
+                            },
+                            {
+                                "text": "Walk away",
+                                "nextNode": {
+                                    "content": "The trail goes cold and the mystery remains unsolved.",
+                                    "isEnding": True,
+                                    "isWinningEnding": False,
+                                    "options": []
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "text": "Follow the city lights",
+                    "nextNode": {
+                        "content": "The lights lead you into a risky alley.",
+                        "isEnding": True,
+                        "isWinningEnding": False,
+                        "options": []
+                    }
+                }
+            ]
+        }
+    }
+    return json.dumps(story)
+
 def call_hf_model(prompt: str, max_new_tokens: int = 512, temperature: float = 0.7, timeout: int = 60) -> str:
     # debug: re-read settings and print
     from core.config import settings as _settings
@@ -65,7 +116,7 @@ def call_hf_model(prompt: str, max_new_tokens: int = 512, temperature: float = 0
     print("DEBUG call_hf_model HF_MODEL:", HF_MODEL, "HF_API_TOKEN set:", bool(HF_API_TOKEN))
 
     if not HF_API_TOKEN:
-        raise RuntimeError("HF_API_TOKEN not set in environment")
+        return _build_fallback_story("adventure")
 
     client = OpenAI(base_url="https://router.huggingface.co/v1", api_key=HF_API_TOKEN)
 
